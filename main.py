@@ -2,7 +2,6 @@ import base64
 from typing import Annotated
 from fastapi import FastAPI, Response
 from contextlib import asynccontextmanager
-from tkinter.font import names
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from fastapi.staticfiles import StaticFiles
@@ -15,7 +14,7 @@ import shutil
 import uuid
 import aiofiles
 import json
-from Api3D import generate3d
+from Api3D import imageGeneration, modelGeneration
 app = FastAPI()
 
 MODEL_DIR = "photo"
@@ -25,14 +24,12 @@ UPLOAD_DIRECTORY = '/photo/'
 def root():
     return {'ok':'200'}
 
-@app.post("/add")
-async def upload_file(file: UploadFile = File(...), hf_token: Annotated[list[str] | None, Header()] = None):
-    print(hf_token[0])
-    print(hf_token)
+@app.post("/3d")
+async def modelGen(file: UploadFile = File(...), hf_token: Annotated[list[str] | None, Header()] = None):
     contents = await file.read()
     with open(f'{file.filename}', 'wb') as f:
         f.write(contents)
-    pathFile = await generate3d(photo=file.filename, token=hf_token[0])
+    pathFile = await modelGeneration(photo=file.filename, token=hf_token[0])
     print(file.filename[0:-3])
 
     with open(pathFile, 'rb') as file:
@@ -43,3 +40,20 @@ async def upload_file(file: UploadFile = File(...), hf_token: Annotated[list[str
     print(pathFile)
     return Response(content=jsonR, media_type="application/json")
     
+
+@app.post("/image")
+async def imageGen(promt: Annotated[list[str] | None, Header()] = None, token: Annotated[list[str] | None, Header()] = None):
+    res = {}
+    print(promt)
+    res = await imageGeneration(promt=promt[0], token=token[0])
+    listBase64 = []
+    for i in range(4):
+        path = res[i]['image']
+        with open(path, 'rb') as file:
+            encoded_string = base64.b64encode(file.read()).decode('ascii')
+            stringCoded = str(encoded_string)
+            listBase64.append(stringCoded)
+
+    jsonR = json.dumps({'0': listBase64[0],'1': listBase64[1],'2': listBase64[2],'3': listBase64[3]})
+    return Response(content=jsonR, media_type="application/json")
+

@@ -1,6 +1,5 @@
-async def generate3d(photo, token):
-    from gradio_client import Client, handle_file
-    
+from gradio_client import Client, handle_file
+async def modelGeneration(photo, token):
     client = Client("tencent/Hunyuan3D-2", hf_token=token)
     result = client.predict(
     caption="Пример описания",  # Текстовое описание (опционально)
@@ -12,6 +11,18 @@ async def generate3d(photo, token):
     check_box_rembg=True,  # Удаление фона
     api_name="/shape_generation"
     )
-    # print(result[0]['value'])
     return result[0]['value']
 
+async def imageGeneration(promt, token):
+    client = Client("stabilityai/stable-diffusion", hf_token=token)
+    result = client.predict(
+	prompt=promt,
+	negative="null",
+	api_name="/infer"
+    )
+    print(result[0]['image']),
+    print(result[1]['image']),
+    print(result[2]['image']),
+    print(result[3]['image']),
+    return result
+    
