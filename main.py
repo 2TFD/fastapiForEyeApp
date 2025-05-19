@@ -60,4 +60,5 @@ async def imageGen(promt: Annotated[list[str] | None, Header()] = None, token: A
 @app.post("/chat")
 async def chatRequest(promt: Annotated[list[str] | None, Header()] = None, token: Annotated[list[str] | None, Header()] = None):
     res = await chatGeneration(promt=promt, token=token) #!######
-    return Response(content={"res":res}, media_type="application/json")
+    jsonR = json.dumps({'0': res})
+    return Response(content=jsonR, media_type="application/json")
