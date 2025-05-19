@@ -14,7 +14,7 @@ import shutil
 import uuid
 import aiofiles
 import json
-from Api3D import imageGeneration, modelGeneration
+from Api3D import chatGeneration, imageGeneration, modelGeneration
 app = FastAPI()
 
 MODEL_DIR = "photo"
@@ -57,3 +57,7 @@ async def imageGen(promt: Annotated[list[str] | None, Header()] = None, token: A
     jsonR = json.dumps({'0': listBase64[0],'1': listBase64[1],'2': listBase64[2],'3': listBase64[3]})
     return Response(content=jsonR, media_type="application/json")
 
+@app.post("/chat")
+async def chatRequest(promt: Annotated[list[str] | None, Header()] = None, token: Annotated[list[str] | None, Header()] = None):
+    res = await chatGeneration(promt=promt, token=token) #!######
+    return Response(content={"res":res}, media_type="application/json")

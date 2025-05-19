@@ -26,3 +26,13 @@ async def imageGeneration(promt, token):
     print(result[3]['image']),
     return result
     
+
+
+
+async def chatGeneration(promt, token):
+    client = Client("tencent/Hunyuan-T1", hf_token=token)
+    result = client.predict(
+	message=promt,
+	api_name="/chat"
+    )
+    return result
