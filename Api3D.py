@@ -36,3 +36,15 @@ async def chatGeneration(promt, token):
 	api_name="/chat"
     )
     return result
+
+
+async def musicGeneration(promt, token, style):
+    client = Client("Adiwanwade/AI_Music_Generator", hf_token=token)
+    result = client.predict(
+	prompt=promt,
+	style=style,
+	duration=10,
+	temperature=0.8,
+	api_name="/predict"
+    )
+    return result

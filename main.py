@@ -14,7 +14,8 @@ import shutil
 import uuid
 import aiofiles
 import json
-from Api3D import chatGeneration, imageGeneration, modelGeneration
+# from Api3D import chatGeneration, imageGeneration, modelGeneration
+import Api3D as api
 app = FastAPI()
 
 MODEL_DIR = "photo"
@@ -25,11 +26,11 @@ def root():
     return {'ok':'200'}
 
 @app.post("/3d")
-async def modelGen(file: UploadFile = File(...), hf_token: Annotated[list[str] | None, Header()] = None):
+async def modelRequest(file: UploadFile = File(...), hf_token: Annotated[list[str] | None, Header()] = None):
     contents = await file.read()
     with open(f'{file.filename}', 'wb') as f:
         f.write(contents)
-    pathFile = await modelGeneration(photo=file.filename, token=hf_token[0])
+    pathFile = await api.modelGeneration(photo=file.filename, token=hf_token[0])
     print(file.filename[0:-3])
 
     with open(pathFile, 'rb') as file:
@@ -42,10 +43,10 @@ async def modelGen(file: UploadFile = File(...), hf_token: Annotated[list[str] |
     
 
 @app.post("/image")
-async def imageGen(promt: Annotated[list[str] | None, Header()] = None, token: Annotated[list[str] | None, Header()] = None):
+async def imageRequest(promt: Annotated[list[str] | None, Header()] = None, token: Annotated[list[str] | None, Header()] = None):
     res = {}
     print(promt)
-    res = await imageGeneration(promt=promt[0], token=token[0])
+    res = await api.imageGeneration(promt=promt[0], token=token[0])
     listBase64 = []
     for i in range(4):
         path = res[i]['image']
@@ -59,6 +60,15 @@ async def imageGen(promt: Annotated[list[str] | None, Header()] = None, token: A
 
 @app.post("/chat")
 async def chatRequest(promt: Annotated[list[str] | None, Header()] = None, token: Annotated[list[str] | None, Header()] = None):
-    res = await chatGeneration(promt=promt, token=token) #!######
+    res = await api.chatGeneration(promt=promt, token=token) #!######
     jsonR = json.dumps({'0': res})
+    return Response(content=jsonR, media_type="application/json")
+
+@app.post("/music")
+async def musicRequest(promt: Annotated[list[str] | None, Header()] = None, token: Annotated[list[str] | None, Header()] = None, style: Annotated[list[str] | None, Header()] = None,):
+    path = await api.musicGeneration(promt=promt, token=token, style=style)
+    with open(path, 'rb') as file:
+        encoded_string = base64.b64encode(file.read()).decode('ascii')
+        base64code = str(encoded_string)
+    jsonR = json.dumps({'0': base64code})
     return Response(content=jsonR, media_type="application/json")
