@@ -36,7 +36,7 @@ async def modelRequest(file: UploadFile = File(...), hf_token: Annotated[list[st
     with open(pathFile, 'rb') as file:
         encoded_string = base64.b64encode(file.read()).decode('ascii')
         stringCoded = str(encoded_string)
-        print(stringCoded)
+        # print(stringCoded)
     jsonR = json.dumps({'bytes': encoded_string}, ensure_ascii=False).encode("utf-8")
     print(pathFile)
     return Response(content=jsonR, media_type="application/json")
